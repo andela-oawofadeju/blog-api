@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :articles do
     resources :comments
   end
-
+  post 'auth/login', to: 'authentication#authenticate'
+  post 'signup', to: 'users#create'
   resources :users
 end

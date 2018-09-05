@@ -2,12 +2,14 @@ require 'rails_helper'
 
 RSpec.describe 'Articles API', type: :request do
   # initialize test data 
-  let!(:articles) { create_list(:article, 10) }
-  let(:article_id) { article.first.id }
+  let(:user) { create(:user) }
+  let!(:articles) { create_list(:article, 10, authorized_by: user.id) }
+  let(:article_id) { articles.first.id }
+  let(:headers) { valid_headers }
   # Test suite for GET /articles
   describe 'GET /articles' do
     # make HTTP get request before each example
-    before { get '/articles' }
+    before { get '/articles', params: {}, headers: headers }
 
     it 'returns articles' do
       # Note `json` is a custom helper to parse JSON responses
@@ -22,12 +24,12 @@ RSpec.describe 'Articles API', type: :request do
 
   # Test suite for GET /articles/:id
   describe 'GET /articles/:id' do
-    before { get "/articles/#{article_id}" }
+    before { get "/articles/#{article_id}", params: {}, headers: headers }
 
     context 'when the record exists' do
       it 'returns the todo' do
         expect(json).not_to be_empty
-        expect(json['id']).to eq(todo_id)
+        expect(json['id']).to eq(article_id)
       end
 
       it 'returns status code 200' do
@@ -50,11 +52,13 @@ RSpec.describe 'Articles API', type: :request do
 
   # Test suite for POST /articles
   describe 'POST /articles' do
-    # valid payload
-    let(:valid_attributes) { { title: 'Personal Hygiene', post: 'Take care of youself' } }
+    # send json payload
+    let(:valid_attributes) do
+      { title: 'Personal Hygiene', post: 'Take care of youself', authorized_by: user.id.to_s }.to_json
+    end
 
     context 'when the request is valid' do
-      before { post '/articles', params: valid_attributes }
+      before { post '/articles', params: valid_attributes, headers: headers }
 
       it 'creates an article' do
         expect(json['title']).to eq('Personal Hygiene')
@@ -66,14 +70,15 @@ RSpec.describe 'Articles API', type: :request do
     end
 
     context 'when the request is invalid' do
-      before { post '/articles', params: { title: 'AnyAny' } }
+      let(:invalid_attributes) { { title: nil }.to_json }
+      before { post '/articles', params: invalid_attributes, headers: headers }
 
       it 'returns status code 422' do
         expect(response).to have_http_status(422)
       end
 
       it 'returns a validation failure message' do
-        expect(response.body)
+        expect(json['message'])
           .to match(/Validation failed: Post field can't be empty/)
       end
     end
@@ -81,10 +86,10 @@ RSpec.describe 'Articles API', type: :request do
 
   # Test suite for PUT /articles/:id
   describe 'PUT /articles/:id' do
-    let(:valid_attributes) { { title: 'Shopping' } }
+    let(:valid_attributes) { { title: 'Shopping'}.to_json }
 
     context 'when the record exists' do
-      before { put "/articles/#{article_id}", params: valid_attributes }
+      before { put "/articles/#{article_id}", params: valid_attributes, headers: headers}
 
       it 'updates the record' do
         expect(response.body).to be_empty
@@ -98,7 +103,7 @@ RSpec.describe 'Articles API', type: :request do
 
   # Test suite for DELETE /articles/:id
   describe 'DELETE /articles/:id' do
-    before { delete "/articles/#{article_id}" }
+    before { delete "/articles/#{article_id}", params: {}, headers: headers }
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)

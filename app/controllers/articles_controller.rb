@@ -4,13 +4,13 @@ class ArticlesController < ApplicationController
   #GET /articles
 
   def index
-    @articles = Article.all
+    @articles = current_user.articles
     json_response(@articles)
   end
 
   #POST /articles
   def create
-    @article = Article.create!(article_params)
+    @article = current_user.articles.create!(article_params)
     json_response(@article, :created)
   end
 

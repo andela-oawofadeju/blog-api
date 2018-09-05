@@ -34,7 +34,7 @@ class CommentsController < ApplicationController
   private
   
   def comment_params
-    params.permit(:name, content)
+    params.permit(:name, :content)
   end
 
   def set_article
@@ -42,6 +42,6 @@ class CommentsController < ApplicationController
   end
 
   def set_comment
-    @comment = Comment.find_by!(id: params[:id]) if @article
+    @comment = @article.comments.find_by!(id: params[:id]) if @article
   end
 end

@@ -2,14 +2,16 @@ require 'rails_helper'
 RSpec.describe 'Comments API'  do
 
   #initialize the test data
-  let!(:article) { create(:article) }
-  let!(:comments) { create_list(:comment, 20, article_id: article.id) }
+  let(:user) { create(:user) }
+  let!(:article) { create(:article, authorized_by: user.id) }
+  let!(:comments) { create_list(:comment, 10, article_id: article.id) }
   let(:article_id) { article.id }
-  let(:id) { articles.first.id }
+  let(:id) { comments.first.id }
+  let(:headers) { valid_headers }
 
   # Test suite for GET /articles/:article_id/comments
   describe 'GET /articles/:article_id/comments' do
-    before { get "/articles/#{article_id}/comments" }
+    before { get "/articles/#{article_id}/comments", params: {}, headers: headers }
 
     context 'when an article exists' do
       it 'returns status code 200' do
@@ -17,7 +19,7 @@ RSpec.describe 'Comments API'  do
       end
 
       it 'returns all comments attached' do
-        expect(json.size).to eq(20)
+        expect(json.size).to eq(10)
       end
     end
 
@@ -37,7 +39,7 @@ RSpec.describe 'Comments API'  do
   
   #test suite for GET /articles/:article_id/comments/:id
   describe 'GET /articles/:article_id/comments/:id' do
-    before { get "/articles/#{article_id}/comments/#{id}" }
+    before { get "/articles/#{article_id}/comments/#{id}", params: {}, headers: headers }
 
     context 'when a comment of an article exists' do
       it 'returns status code 200' do
@@ -64,10 +66,10 @@ RSpec.describe 'Comments API'  do
 
   # Test suite for POST /articles/:article_id/comments
   describe 'POST /articles/:article_id/comments' do
-    let(:valid_attributes) { { name: 'Writer abc', content: 'abrakadabra' } }
+    let(:valid_attributes) { { name: 'Writer abc', content: 'abrakadabra' }.to_json }
 
     context 'when request attributes are valid' do
-      before { post "/articles/#{article_id}/comments", params: valid_attributes }
+      before { post "/articles/#{article_id}/comments", params: valid_attributes , headers: headers}
 
       it 'returns status code 201' do
         expect(response).to have_http_status(201)
@@ -75,7 +77,7 @@ RSpec.describe 'Comments API'  do
     end
 
     context 'when an invalid request' do
-      before { post "/articles/#{article_id}/comments", params: {} }
+      before { post "/articles/#{article_id}/comments", params: {}, headers: headers }
 
       it 'returns status code 422' do
         expect(response).to have_http_status(422)
@@ -119,7 +121,7 @@ RSpec.describe 'Comments API'  do
 
   #Test suite for DELETE /articles/:id
   describe 'DELETE /articles/:id' do
-    before { delete "/articles/#{article_id}/comments/#{id}" }
+    before { delete "/articles/#{article_id}/comments/#{id}", params: {}, headers: headers }
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)
