@@ -31,7 +31,7 @@ RSpec.describe 'Comments API'  do
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Article not found/)
+        expect(response.body).to match(/Couldn't find Article/)
       end
     end
   end
@@ -59,7 +59,7 @@ RSpec.describe 'Comments API'  do
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Comment does not exist/)
+        expect(response.body).to match(/Couldn't find Comment/)
       end
     end
   end
@@ -90,10 +90,10 @@ RSpec.describe 'Comments API'  do
   end
 
   #Test suite for PUT /articles/:article_id/comments/:id
-  describe 'PUT /articles/:article_id/article/:id' do
-    let(:valid_attributes) { { name: 'Suzzy' } }
+  describe 'PUT /articles/:article_id/comments/:id' do
+    let(:valid_attributes) { { name: 'Suzzy' }.to_json }
 
-    before { put "/articles/#{article_id}/comments#{id}", params: valid_attributes }
+    before { put "/articles/#{article_id}/comments/#{id}", params: valid_attributes, headers:headers }
 
     context 'when a comment exists' do
       it 'returns status code 204' do
@@ -114,7 +114,7 @@ RSpec.describe 'Comments API'  do
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Comment not found/)
+        expect(response.body).to match(/Couldn't find Comment/)
       end
     end
   end

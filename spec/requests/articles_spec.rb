@@ -45,7 +45,7 @@ RSpec.describe 'Articles API', type: :request do
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Article does not exist/)
+        expect(response.body).to match(/Couldn't find Article/)
       end
     end
   end
@@ -79,7 +79,7 @@ RSpec.describe 'Articles API', type: :request do
 
       it 'returns a validation failure message' do
         expect(json['message'])
-          .to match(/Validation failed: Post field can't be empty/)
+          .to match(/Validation failed: Title can't be blank, Post can't be blank/)
       end
     end
   end
